@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  web:
+    container_name: frontend
+    restart: unless-stopped
+    image: test_web:1.0.0
+    build:
+      context: Frontend
+      dockerfile: Dockerfile
+      args:
+        PORT: 3000
+    environment:
+      PORT: 3000
+    networks:
+      - testnet
+
+  nginx:
+    container_name: nginx
+    restart: always
+    image: "nginx:1.22"
+    ports:
+      - 8080:80
+    volumes:
+    #- ${VOLUME_CERTS}:/etc/certs
+      - ./Volumes/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
+    networks:
+      - testnet
+
+networks:
+  testnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: "172.21.0.0/24"
+        gateway: "172.21.0.1"
